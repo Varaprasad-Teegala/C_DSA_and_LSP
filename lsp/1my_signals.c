@@ -6,7 +6,7 @@
 
 void sgnl(int s)
 {
-	printf("\nTerminatred....\n");
+	printf("\nTerminated....\n");
 	exit(0);
 }
 
