@@ -6,42 +6,49 @@
 #include <sys/wait.h>
 #include <pthread.h> 
 #include <semaphore.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
+#define LEN  1024
+
+pid_t chld_pid;
+int fd[2];
+
+void handler()
+{
+	kill(chld_pid,SIGTERM);
+	kill(getpid(),SIGTERM);
+}
 
 int main()
 {
-	int fd[2];
+	signal(SIGINT,handler);
 	pipe(fd);
 	int p;
 	int x = fork();
 	if(x == 0)  // child process
 	{
-		//while(1)
-                //{
-                        open(fd[1]);
-                        char s[1000];
-                        printf("Write server PID-%d : ",getpid());    //Write 
+		chld_pid = getpid();
+		while(1)
+                {
+                        char s[LEN];
+                        //Write 
                         scanf("%[^\n]s",s);
+			getchar();
                         write(fd[1],s,strlen(s));
-                        close(fd[1]);
-                //}
+                }
 
 	}
 	else if(x>0)  // parent process
 	{	
-		//while(1)
-                //{
-                        //open(fd[0]);
+		while(1)
+                {
                         char c[BUFSIZ+1];
-			//while(read(fd[0],c,BUFSIZ))
-			//{	
-				open(fd[0]);
-                        	read(fd[0],c,BUFSIZ);
-                        	printf("client PID-%d : %s\n",getpid(),c);   //read
-				close(fd[0]);
-			//}
-                        //close(fd[0]);
-               // }
+                        read(fd[0],c,BUFSIZ);
+                        printf("client PID-%d : %s\n",getpid(),c);   //read
+			memset(c,'\0',BUFSIZ);
+                }
 
 	}
 	else
