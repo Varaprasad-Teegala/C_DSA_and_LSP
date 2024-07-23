@@ -24,10 +24,13 @@ void * my_read()
         while(1)
         {
 		sem_wait(&s1);
+
                 fd = open("myfifo",O_RDWR);
                 read(fd,rx,BUFSIZ);
 		printf("From Ramesh : %s\n",rx);
+		memset(rx,'\0',strlen(rx));
                 close(fd);
+
 		sem_post(&s2);
         }
 }
@@ -39,11 +42,13 @@ void * my_write()
         while(1)
         {
 		sem_wait(&s2);
+
 		fd = open("myfifo",O_RDWR);
-                printf("Me : ");
                 fgets(tx,1000,stdin);
                 write(fd,tx,strlen(tx));
+		memset(tx,'\0',strlen(tx));
 		close(fd);
+
 		sem_post(&s1);
         }
 }
@@ -66,28 +71,6 @@ int main()
 
 	sem_init(&s1,0,0);
         sem_init(&s2,0,1);
-
-	/*while(1)
-        {
-                fd = open("myfifo",O_WRONLY);
-                printf("Me : ");
-                fgets(tx,1000,stdin);
-                write(fd,tx,strlen(tx));
-                close(fd);
-
-                fd = open("myfifo",O_RDONLY);
-                read(fd,rx,BUFSIZ);
-                printf("From Suresh : %s\n",rx);
-                close(fd);
-
-		fd = open("myfifo",O_WRONLY);
-                printf("Me : ");
-                fgets(tx,1000,stdin);
-                write(fd,tx,strlen(tx));
-                close(fd);
-
-        }*/
-
 
 	pthread_create(&t1,NULL,my_read,NULL);
 	pthread_create(&t2,NULL,my_write,NULL);
